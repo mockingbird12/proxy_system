@@ -9,6 +9,12 @@ INSTANCE=$2
 ACTION=$1
 UPDATE="update"
 
+
+function generate_Password {
+echo "generate passwd"
+return $('pass1')
+}
+
 case $ACTION in
 "-start")
     echo "Start"
@@ -26,14 +32,17 @@ case $ACTION in
         tor_cmd="tor --RunAsDaemon 1 --CookieAuthentication 0 --HashedControlPassword \"\" --ControlPort $c_port --SocksPort $s_port --DataDirectory  $root_dir/tor$i --User toranon"
         echo $tor_cmd
         eval $tor_cmd
-        echo "pproxy -l http+socks4+socks5://$BASE_IP:$p_port/#user1:111 -r socks5://127.0.0.1:$s_port --daemon"
-        pproxy -l http+socks4+socks5://$BASE_IP:$p_port/#user1:111 -r socks5://127.0.0.1:$s_port --daemon
+	passwd=$(generate_Password)
+	pproxy_cmd="pproxy -l http+socks4+socks5://$BASE_IP:$p_port/#user1:$passwd -r socks5://127.0.0.1:$s_port --daemon"
+        echo $pproxy_cmd
+	eval $pproxy_cmd
       done
 ;;
 "-stop")
     echo "Stop"
     killall tor
     killall pproxy
+    rm -rf /var/tmp/tor/
 ;;
 "--help"|"-h"|*)
     echo "Usage: run_proxy.sh [-start,-stop,-help] [instance]"
