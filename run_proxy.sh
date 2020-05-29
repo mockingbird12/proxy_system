@@ -23,7 +23,7 @@ case $ACTION in
 	s_port=$((TOR_PORT+i))
 	p_port=$((PPROXY_PORT+i))
       
-        tor_cmd="tor --RunAsDaemon 1 --CookieAuthentication 0 --HashedControlPassword \"\" --ControlPort $c_port --SocksPort $s_port --DataDirectory  --User toranon"
+        tor_cmd="tor --RunAsDaemon 1 --CookieAuthentication 0 --HashedControlPassword \"\" --ControlPort $c_port --SocksPort $s_port --DataDirectory  $root_dir/tor$i --User toranon"
         echo $tor_cmd
         eval $tor_cmd
         echo "pproxy -l http+socks4+socks5://$BASE_IP:$p_port/#user1:111 -r socks5://127.0.0.1:$s_port --daemon"
@@ -32,7 +32,9 @@ case $ACTION in
 ;;
 "-stop")
     echo "Stop"
+    killall tor
+    killall pproxy
 ;;
-"-help")
+"--help"|"-h"|*)
     echo "Usage: run_proxy.sh [-start,-stop,-help] [instance]"
 esac
