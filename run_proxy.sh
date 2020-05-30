@@ -8,11 +8,11 @@ BASE_IP=192.168.77.3
 INSTANCE=$2
 ACTION=$1
 UPDATE="update"
-
+PASSWD_FILE=passwd.txt
 
 function generate_Password {
-echo "generate passwd"
-return $('pass1')
+    pass=`< /dev/urandom tr -dc a-z-0-9 | head -c${1:-6};echo;`
+    echo $pass
 }
 
 case $ACTION in
@@ -32,10 +32,11 @@ case $ACTION in
         tor_cmd="tor --RunAsDaemon 1 --CookieAuthentication 0 --HashedControlPassword \"\" --ControlPort $c_port --SocksPort $s_port --DataDirectory  $root_dir/tor$i --User toranon"
         echo $tor_cmd
         eval $tor_cmd
-	passwd=$(generate_Password)
-	pproxy_cmd="pproxy -l http+socks4+socks5://$BASE_IP:$p_port/#user1:$passwd -r socks5://127.0.0.1:$s_port --daemon"
+	passwd=$( generate_Password )
+	pproxy_cmd="pproxy -l http+socks4+socks5://$BASE_IP:$p_port/#user$i:$passwd -r socks5://127.0.0.1:$s_port --daemon"
         echo $pproxy_cmd
 	eval $pproxy_cmd
+        echo user$i:$passwd >> $root_dir/passwd
       done
 ;;
 "-stop")
